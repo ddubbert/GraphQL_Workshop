@@ -1,0 +1,92 @@
+scalar DateTime
+
+type Query {
+    users: [User!]
+}
+
+interface User {
+    id: ID!
+    member_since: DateTime!
+    username: String!
+    email: String
+    address: Address
+}
+
+type Address {
+    street_name: String!
+    street_number: String!
+    city: String!
+    zip_code: Int!
+    country: String!
+}
+
+type Consumer implements User {
+    id: ID!
+    member_since: DateTime!
+    username: String!
+    email: String
+    address: Address
+    purchases: [Product!]
+}
+
+type Producer implements User {
+    id: ID!
+    member_since: DateTime!
+    username: String!
+    email: String
+    address: Address
+    description: String
+    business_days: [Day!]!
+    transfer_accounts: [TransferAccount!]
+    accepted_payments: [Payment!]
+    company: Company
+    products: [Product!]
+    average_rating: Float
+    reviews: [Review!]
+}
+
+type Company {
+    id: ID!
+    name: String!
+    address: Address
+    members: [Producer!]
+}
+
+enum Day {
+    MONDAY
+    TUESDAY
+    WEDNESDAY
+    THURSDAY
+    FRIDAY
+    SATURDAY
+    SUNDAY
+}
+
+union TransferAccount =  Paypal | Bank
+
+type Paypal {
+    email: String!
+}
+
+type Bank {
+    account_number: String!
+    bank_code: String!
+    bank_name: String!
+}
+
+enum Payment{
+    CREDITCARD
+    PAYPAL
+    CASH
+    BANKTRANSFER
+}
+
+type Review {
+    """ A number betweeen 1 and 5 (including bounderies) """
+    rating: Int!
+    comment: String!
+}
+
+type Product {
+    name: String!
+}
