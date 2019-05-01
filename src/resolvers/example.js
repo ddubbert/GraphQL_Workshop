@@ -1,109 +1,87 @@
+const Day = require('../utils/enums/Day')
+const Payment = require('../utils/enums/Payment')
+const UserType = require('../utils/enums/UserType')
 
-const Day = Object.freeze({
-    MONDAY: 0,
-    TUESDAY: 1,
-    WEDNESDAY: 2,
-    THURSDAY: 3,
-    FRIDAY: 4,
-    SATURDAY: 5,
-    SUNDAY: 6
-})
-
-const Payment = Object.freeze({
-    CREDITCARD: 0,
-    BANKTRANSFER: 1,
-    CASH: 2,
-    PAYPAL: 3
-})
-
-const UserType = Object.freeze({
-    CONSUMER: 'consumer',
-    PRODUCER: 'producer'
-})
-
-const users = [
-    {
-        id: '1',
-        type: UserType.PRODUCER,
-        member_since: new Date(),
-        username: 'peter_lustig',
-        email: 'peter@lustig.com',
-        address: {
-            street_name: 'Lustigstraße',
-            street_number: '16a',
-            city: 'Lustighausen',
-            zip_code: '12345',
-            country: 'LaLaLand'
-        },
-        description: 'Leidenschaftlicher Kleingärtner und Gitarrist. Nebenberuflich in der Lehre tätig.',
-        business_days: [Day.TUESDAY, Day.WEDNESDAY, Day.THURSDAY, Day.FRIDAY],
-        transfer_accounts: [
-            {
-                email: 'peter@lustig.com'
-            },
-            {
-                account_number: 'LL123456789101112',
-                bank_code: '1234567810',
-                bank_name: 'LaLa Bank'
-            }
-        ],
-        accepted_payments: [Payment.CREDITCARD, Payment.BANKTRANSFER, Payment.PAYPAL],
-        companyId: '1',
-        productIds: [], // TODO
-        reviews: [
-            {
-                rating: 5,
-                comment: 'Toller Kerl. Die Ware ist super und er hat mir auch noch einiges beigebracht.'
-            },
-            {
-                rating: 1,
-                comment: 'Ware ist an sich nicht schlecht... ABER irgendwie waren die Tomaten nach 4 Wochen grün und flauschig. Daher Punktabzug... Unverschämtheit!!!!!!'
-            }
-        ]
-    },
-]
-
-const companies = [
-    {
-        id: '1',
-        name: 'Blauer Wohnwagen AG',
-        address: {
-            street_name: 'Lustigstraße',
-            street_number: '16a',
-            city: 'Lustighausen',
-            zip_code: '12345',
-            country: 'LaLaLand'
-        },
-        memberIds: ['1', '2']
-    }
-]
+const userDB = require('../utils/databases/user.db')
+const companyDB = require('../utils/databases/company.db')
+const reviewDB = require('../utils/databases/reviews.db')
+const productDB = require('../utils/databases/product.db')
 
 module.exports = {
     Query: {
-        users: (_parent, _args, _context, _info) => users,
+        users: (_parent, _args, _context, _info) => userDB.getAllUsers(),
+        user: (_parent, args, _context, _info) => {
+            const { userId } = args
+            return (userDB.getUsersByIds([userId]))[0]
+        },
+        producers: (_parent, _args, _context, _info) => userDB.getAllUsersOfType(UserType.PRODUCER),
+        reviews: (_parent, args, _context, _info) => {
+            const { creatorId } = args
+
+            if (userDB.isUser(creatorId)) {
+                return reviewDB.getReviewsOfUser(creatorId)
+            }
+            throw new Error('User not found.')
+        },
+    },
+    Mutation: {
+        createReview: (_parent, args, _context, _info) => {
+            const { producerId, reviewInput } = args
+            const { rating } = reviewInput
+            
+            if (rating > 5 || rating < 1) throw new Error('Rating is not valid.')
+            return reviewDB.addReviewForProducer(producerId, reviewInput)
+        }
     },
     Producer: {
         company: (parent, _args, _context, _info) => {
-            if (!parent.companyId) return null
-            const [company] = companies.filter((company) => company.id === parent.companyId)
-            return company
+            const { companyId } = parent
+            if (!companyId) return null
+
+            return companyDB.getCompanyById(companyId)
         },
         products: (parent, _args, _context, _info) => {
-            if (parent.productIds.length === 0) return null
-            return products.filter((product) => parent.productIds.includes(product.id))
+            return productDB.getProductsByQuery({producerId: parent.id})
         },
+        reviews: (parent, _args, _context, _info) => reviewDB.getReviewsForProducer(parent.id),
         average_rating: (parent, _args, _context, _info) => {
-            if (parent.reviews.length === 0) return null
-            const sum = parent.reviews.reduce((accumulator, review) => {
-                return accumulator + review.rating
-            }, 0)
-            return sum / parent.reviews.length
+            try {
+                const reviews = reviewDB.getReviewsForProducer(parent.id)
+                const sum = reviews.reduce((accumulator, review) => {
+                    return accumulator + review.rating
+                }, 0)
+    
+                return sum / reviews.length
+            } catch (e) {
+                return null
+            }
+        },
+    },
+    Consumer: {
+        purchases: (parent, _args, _context, _info) => {
+            const { productIds } = parent
+            if (productIds.length === 0) return null
+
+            return productDB.getProductsByIds(productIds)
         },
     },
     Company: {
         members: (parent, _args, _context, _info) => {
-            if (parent.memberIds.length === 0) return null
-            return users.filter((user) => parent.memberIds.includes(user.id))
+            const { memberIds } = parent
+            if (memberIds.length === 0) return null
+            return userDB.getUsersByIds(memberIds)
+        },
+    },
+    Review: {
+        creator: (parent, _args, _context, _info) => {
+            const { creatorId } = parent
+            const [creator] = userDB.getUsersByIds([creatorId])
+            return creator
+        },
+        producer: (parent, _args, _context, _info) => {
+            const { producerId } = parent
+            const [producer] = userDB.getUsersByIds([producerId])
+            return producer
         },
     },
     User: {

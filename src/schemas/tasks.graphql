@@ -1,0 +1,65 @@
+type Query {
+    """ Returns all products. If a query is provided, returns all matching products. """
+    products(queryInput: ProductQueryInput): [Product!]
+
+    """ Returns all orders for a producer. """
+    orders(producerId: ID!): [Order!]
+}
+
+type Mutation {
+    """ Creates a product for the specified producer. """
+    createProduct(producerId: ID!, productInput: ProductCreateInput!): Product!
+}
+
+type Product {
+    id: ID!
+    name: String!
+    description: String
+    amount: Int!
+    unit: Unit!
+    price_per_unit: Float!
+}
+
+input ProductQueryInput {
+    name: String
+    productId: ID
+    producerId: ID
+}
+
+input ProductCreateInput {
+    name: String!
+    description: String
+    amount: Int!
+    unit: Unit!
+    price_per_unit: Float!
+    expiry_date: DateTime
+}
+
+interface Order {
+    id: ID!
+    product: Product!
+    amount: Int!
+    unit: Unit!
+}
+
+type MailOrder {
+    id: ID!
+    product: Product!
+    amount: Int!
+    unit: Unit!
+    consumer_address: Address!
+}
+
+type PickupOrder {
+    id: ID!
+    product: Product!
+    amount: Int!
+    unit: Unit!
+    pickup_date: DateTime!
+}
+
+enum Unit {
+    QUANTITY
+    LITER
+    KILOGRAM
+}

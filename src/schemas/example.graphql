@@ -1,15 +1,22 @@
 scalar DateTime
 
 type Query {
+    """ Returns all registered users. """
     users: [User!]
+
+    """ If found, returns the user with the specified id. """
+    user(userId: ID!): User
+
+    """ Returns all registered producers. """
+    producers: [Producer!]
+
+    """ Returns all reviews created by the user / creator. """
+    reviews(creatorId: ID!): [Review!]
 }
 
-interface User {
-    id: ID!
-    member_since: DateTime!
-    username: String!
-    email: String
-    address: Address
+type Mutation {
+    """ Creates a new review for a producer. """
+    createReview(producerId: ID!, reviewInput: ReviewCreateInput!): Review!
 }
 
 type Address {
@@ -20,11 +27,19 @@ type Address {
     country: String!
 }
 
+interface User {
+    id: ID!
+    member_since: DateTime!
+    username: String!
+    email: String!
+    address: Address
+}
+
 type Consumer implements User {
     id: ID!
     member_since: DateTime!
     username: String!
-    email: String
+    email: String!
     address: Address
     purchases: [Product!]
 }
@@ -33,7 +48,7 @@ type Producer implements User {
     id: ID!
     member_since: DateTime!
     username: String!
-    email: String
+    email: String!
     address: Address
     description: String
     business_days: [Day!]!
@@ -85,8 +100,13 @@ type Review {
     """ A number betweeen 1 and 5 (including bounderies) """
     rating: Int!
     comment: String!
+    creator: User!
+    producer: Producer!
 }
 
-type Product {
-    name: String!
+input ReviewCreateInput {
+    """ A number betweeen 1 and 5 (including bounderies) """
+    rating: Int!
+    comment: String!
+    creatorId: ID!
 }
