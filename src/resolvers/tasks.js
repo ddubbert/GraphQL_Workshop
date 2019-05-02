@@ -28,9 +28,11 @@ module.exports = {
     Mutation: {
         createOrder: (_parent, args, _context, _info) => {
             const { orderInput } = args
+            const keys = Object.keys(orderInput)
 
             if (!productDB.isProduct(orderInput.productId)) throw new Error('Product not found.')
             if (!userDB.isUser(orderInput.customerId)) throw new Error('Product not found.')
+            if (keys.length !== 5) throw new Error('Input is not valid.')
 
             return orderDB.createOrder(orderInput)
         }
