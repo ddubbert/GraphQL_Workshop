@@ -5,13 +5,16 @@ type Query {
     users: [User!]
 
     """ If found, returns the user with the specified id. """
-    user(userId: ID!): User
+    user(name: String!): User
 
     """ Returns all registered producers. """
     producers: [Producer!]
 
     """ Returns all reviews created by the user / creator. """
     reviews(creatorId: ID!): [Review!]
+    
+    """ Returns all products. If a query is provided, returns all matching products. """
+    products(queryInput: ProductQueryInput): [Product!]
 }
 
 type Mutation {
@@ -32,34 +35,38 @@ interface User {
     member_since: DateTime!
     username: String!
     email: String!
-    address: Address
+    address: Address!
 }
 
+""" A user of this platform that is only allowed to buy products. """
 type Consumer implements User {
     id: ID!
     member_since: DateTime!
     username: String!
     email: String!
-    address: Address
+    address: Address!
+    """ Saved payment methods of a consumer. """
+    transfer_accounts: [TransferAccount!]
     purchases: [Product!]
 }
 
+""" A user of this platform that is allowed to buy and sell products. """
 type Producer implements User {
     id: ID!
     member_since: DateTime!
     username: String!
     email: String!
-    address: Address
+    address: Address!
     description: String
     business_days: [Day!]!
-    transfer_accounts: [TransferAccount!]
     accepted_payments: [Payment!]
     company: Company
-    products: [Product!]
+    products(name: String): [Product!]
     average_rating: Float
     reviews: [Review!]
 }
 
+""" A voluntary association or group of producers, that are organized to carry on a business. """
 type Company {
     id: ID!
     name: String!
@@ -77,18 +84,22 @@ enum Day {
     SUNDAY
 }
 
+""" Accounts used, to transfer money. """
 union TransferAccount =  Paypal | Bank
 
+""" A paypal account. """
 type Paypal {
     email: String!
 }
 
+""" Any bank account. """
 type Bank {
     account_number: String!
     bank_code: String!
     bank_name: String!
 }
 
+""" Possible payment methods. """
 enum Payment{
     CREDITCARD
     PAYPAL
@@ -96,6 +107,7 @@ enum Payment{
     BANKTRANSFER
 }
 
+""" A comment and rating created by an user for a producer. """
 type Review {
     """ A number betweeen 1 and 5 (including bounderies) """
     rating: Int!
@@ -109,4 +121,24 @@ input ReviewCreateInput {
     rating: Int!
     comment: String!
     creatorId: ID!
+}
+
+type Product {
+    id: ID!
+    name: String!
+    unit: Unit!
+    price_per_unit: Float!
+    description: String
+}
+
+input ProductQueryInput {
+    name: String
+    productId: ID
+    producerId: ID
+}
+
+enum Unit {
+    QUANTITY
+    LITER
+    KILOGRAM
 }

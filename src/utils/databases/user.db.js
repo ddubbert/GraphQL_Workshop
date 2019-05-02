@@ -4,7 +4,7 @@ const Payment = require('../enums/Payment')
 
 const users = [
     {
-        id: '1',
+        id: 'd467f50a',
         type: UserType.PRODUCER,
         member_since: new Date(),
         username: 'peter-lustig',
@@ -18,21 +18,11 @@ const users = [
         },
         description: 'Leidenschaftlicher Kleingärtner und Ukulelist. Nebenberuflich in der Lehre tätig.',
         business_days: [Day.TUESDAY, Day.WEDNESDAY, Day.THURSDAY, Day.FRIDAY],
-        transfer_accounts: [
-            {
-                email: 'peter@lustig.com'
-            },
-            {
-                account_number: 'LL123456789101112',
-                bank_code: '1234567810',
-                bank_name: 'LaLa Bank'
-            }
-        ],
         accepted_payments: [Payment.CREDITCARD, Payment.BANKTRANSFER, Payment.PAYPAL],
-        companyId: '1',
+        companyId: '371299b7',
     },
     {
-        id: '2',
+        id: 'da8ab4c0',
         type: UserType.PRODUCER,
         member_since: new Date(),
         username: 'klaus-dieter',
@@ -46,16 +36,11 @@ const users = [
         },
         description: 'Trotz seiner Größe und Bewegungseinschränkung ein begeisterter Gärtner. Hängt sehr an seinem Bauwagen.',
         business_days: [Day.MONDAY, Day.WEDNESDAY, Day.FRIDAY],
-        transfer_accounts: [
-            {
-                email: 'klaus@dieter.com'
-            },
-        ],
         accepted_payments: [Payment.PAYPAL, Payment.CASH],
-        companyId: '1',
+        companyId: '371299b7',
     },
     {
-        id: '3',
+        id: '8935b480',
         type: UserType.CONSUMER,
         member_since: new Date(),
         username: 'hermann-paschulke',
@@ -67,7 +52,17 @@ const users = [
             zip_code: '12345',
             country: 'LaLaLand'
         },
-        productIds: ['1', '2', '3'],
+        transfer_accounts: [
+            {
+                email: 'hermann@paschulke.com'
+            },
+            {
+                account_number: 'LL123456789101112',
+                bank_code: '1234567810',
+                bank_name: 'LaLa Bank'
+            }
+        ],
+        productIds: ['b4867cbd', '32abfe84', '44080730'],
     },
 ]
 
@@ -75,20 +70,44 @@ const getAllUsers = () => users
 
 const getAllUsersOfType = (userType) => users.filter((user) => user.type === userType)
 
-const getUsersByIds = (userIds) => {
-    const matchingUsers = users.filter((user) => userIds.includes(user.id))
-    if (matchingUsers.length === 0) throw new Error('Users not found.')
-    return matchingUsers
+const getUsersByIdArray = (userIds) => {
+    return users.filter((user) => userIds.includes(user.id))
+}
+
+const getUserById = (userId) => {
+    try {
+        const [matchingUser] = users.filter((user) => userId === user.id)
+        return matchingUser
+    } catch (e) {
+        return null
+    }
+}
+
+const getUserByName = (username) => {
+    try {
+        const [matchingUser] = users.filter((user) => username === user.username)
+        return matchingUser
+    } catch (e) {
+        return null
+    }
 }
 
 const isUser = (userId) => {
-    const matchingUsers = users.filter((user) => userId === user.id)
-    return matchingUsers.length > 0
+    const matchingUser = getUserById(userId)
+    return matchingUser !== null
+}
+
+const isProducer = (userId) => {
+    const matchingUser = getUserById(userId)
+    return matchingUser !== null && matchingUser.type === UserType.PRODUCER
 }
 
 module.exports = Object.freeze({
     getAllUsers,
     getAllUsersOfType,
-    getUsersByIds,
-    isUser
+    getUserById,
+    getUserByName,
+    getUsersByIdArray,
+    isUser,
+    isProducer
 })

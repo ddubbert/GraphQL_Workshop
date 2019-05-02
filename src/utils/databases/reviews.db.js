@@ -1,34 +1,42 @@
 const reviews = [
     {
-        producerId: '1',
+        producerId: 'd467f50a',
         rating: 5,
         comment: 'Toller Kerl. Die Ware ist super und er hat mir auch noch einiges beigebracht.',
-        creatorId: '3'
+        creatorId: '8935b480'
     },
     {
-        producerId: '1',
+        producerId: 'da8ab4c0',
+        rating: 1,
+        comment: 'Ware ist nie angekommen. Der Verkäufer hat am Telefon ohne ende geredet aber nichts gesendet. Peter ist besser.',
+        creatorId: '8935b480'
+    },
+    {
+        producerId: 'd467f50a',
         rating: 1,
         comment: 'Ware ist an sich nicht schlecht... ABER irgendwie waren die Tomaten nach 4 Wochen grün und flauschig. Daher Punktabzug... Unverschämtheit!!!!!!',
-        creatorId: '2'
+        creatorId: 'da8ab4c0'
     },
     {
-        producerId: '2',
+        producerId: 'd467f50a',
+        rating: 1,
+        comment: 'Der stiehlt mir immer die Show. Ich mag den nicht. Und sein Essen ist nicht lecker!!!!!',
+        creatorId: 'da8ab4c0'
+    },
+    {
+        producerId: 'da8ab4c0',
         rating: 5,
-        comment: 'Perfekte Lebensmittel. Lecker und günstig. Viel besser als dieser Peter',
-        creatorId: '2'
+        comment: 'Perfekte Lebensmittel. Lecker und günstig. Viel besser als die von diesem Peter',
+        creatorId: 'da8ab4c0'
     }
 ]
 
 const getReviewsOfUser = (userId) => {
-    const reviewsOfUser = reviews.filter((review) => review.creatorId === userId)
-    if (reviewsOfUser.length === 0) throw new Error('No reviews found.')
-    return reviewsOfUser
+    return reviews.filter((review) => review.creatorId === userId)
 }
 
 const getReviewsForProducer = (producerId) => {
-    const reviewsForProducer = reviews.filter((review) => review.producerId === producerId)
-    if (reviewsForProducer.length === 0) throw new Error('No reviews found.')
-    return reviewsForProducer
+    return reviews.filter((review) => review.producerId === producerId)
 }
 
 const addReviewForProducer = (producerId, review) => {

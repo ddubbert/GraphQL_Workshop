@@ -1,6 +1,6 @@
 const companies = [
     {
-        id: '1',
+        id: '371299b7',
         name: 'Blauer Bauwagen AG',
         address: {
             street_name: 'Lustigstraße',
@@ -9,7 +9,7 @@ const companies = [
             zip_code: '12345',
             country: 'LaLaLand'
         },
-        memberIds: ['1', '2']
+        memberIds: ['d467f50a', 'da8ab4c0']
     }
 ]
 
@@ -18,7 +18,7 @@ const getCompanyById = (companyId) => {
         const [company] = companies.filter((company) => company.id === companyId)
         return company
     } catch (e) {
-        throw new Error('Company not found.')
+        return null
     }
 }
 

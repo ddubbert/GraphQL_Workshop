@@ -1,92 +1,127 @@
 const Day = require('../utils/enums/Day')
 const Payment = require('../utils/enums/Payment')
 const UserType = require('../utils/enums/UserType')
+const Unit = require('../utils/enums/Unit')
 
 const userDB = require('../utils/databases/user.db')
 const companyDB = require('../utils/databases/company.db')
 const reviewDB = require('../utils/databases/reviews.db')
 const productDB = require('../utils/databases/product.db')
 
+const isValidRating = (rating) => rating <= 5 && rating >= 1
+
 module.exports = {
     Query: {
-        users: (_parent, _args, _context, _info) => userDB.getAllUsers(),
-        user: (_parent, args, _context, _info) => {
-            const { userId } = args
-            return (userDB.getUsersByIds([userId]))[0]
+        users: (_parent, _args, _context, _info) => {
+            const users = userDB.getAllUsers()
+            return (users.length > 0) ? users : null
         },
-        producers: (_parent, _args, _context, _info) => userDB.getAllUsersOfType(UserType.PRODUCER),
+        user: (_parent, args, _context, _info) => {
+            const { name } = args
+            return userDB.getUserByName(name)
+        },
+        producers: (_parent, _args, _context, _info) => {
+            const producers = userDB.getAllUsersOfType(UserType.PRODUCER)
+            return (producers.length > 0) ? producers : null
+        },
         reviews: (_parent, args, _context, _info) => {
             const { creatorId } = args
 
-            if (userDB.isUser(creatorId)) {
-                return reviewDB.getReviewsOfUser(creatorId)
+            const reviews = reviewDB.getReviewsOfUser(creatorId)
+            return (reviews.length > 0) ? reviews : null
+        },
+        products: (_parent, args, _context, _info) => {
+            const { queryInput } = args
+
+            if (queryInput) {
+                const products = productDB.getProductsMatchingQuery(queryInput)
+                return (products.length > 0) ? products : null
             }
-            throw new Error('User not found.')
+
+            return productDB.getAllProducts()
         },
     },
     Mutation: {
         createReview: (_parent, args, _context, _info) => {
             const { producerId, reviewInput } = args
             const { rating } = reviewInput
-            
-            if (rating > 5 || rating < 1) throw new Error('Rating is not valid.')
+
+            if (!isValidRating(rating)) throw new Error('Rating is not valid.')
+            if (!userDB.isProducer(producerId)) throw new Error('User is not a producer.')
+
             return reviewDB.addReviewForProducer(producerId, reviewInput)
         }
     },
     Producer: {
         company: (parent, _args, _context, _info) => {
             const { companyId } = parent
-            if (!companyId) return null
 
-            return companyDB.getCompanyById(companyId)
+            return (companyId) ? companyDB.getCompanyById(companyId) : null
         },
-        products: (parent, _args, _context, _info) => {
-            return productDB.getProductsByQuery({producerId: parent.id})
+        products: (parent, args, _context, _info) => {
+            const { name } = args
+            const query = { producerId: parent.id }
+            
+            if (name) query.name = name
+
+            const products = productDB.getProductsMatchingQuery(query)
+
+            return (products.length > 0) ? products : null
         },
-        reviews: (parent, _args, _context, _info) => reviewDB.getReviewsForProducer(parent.id),
+        reviews: (parent, _args, _context, _info) => { 
+            const reviews = reviewDB.getReviewsForProducer(parent.id)
+
+            return (reviews.length > 0) ? reviews : null
+        },
         average_rating: (parent, _args, _context, _info) => {
-            try {
-                const reviews = reviewDB.getReviewsForProducer(parent.id)
-                const sum = reviews.reduce((accumulator, review) => {
-                    return accumulator + review.rating
-                }, 0)
-    
-                return sum / reviews.length
-            } catch (e) {
-                return null
-            }
-        },
+            const reviews = reviewDB.getReviewsForProducer(parent.id)
+
+            if (reviews.length === 0) return null
+
+            const sum = reviews.reduce((accumulator, review) => {
+                return accumulator + review.rating
+            }, 0)
+
+            return sum / reviews.length
+        }
     },
     Consumer: {
         purchases: (parent, _args, _context, _info) => {
             const { productIds } = parent
+
             if (productIds.length === 0) return null
 
-            return productDB.getProductsByIds(productIds)
+            const purchasedProducts = productDB.getProductsByIdArray(productIds)
+
+            return (purchasedProducts.length > 0) ? purchasedProducts : null
         },
     },
     Company: {
         members: (parent, _args, _context, _info) => {
             const { memberIds } = parent
+
             if (memberIds.length === 0) return null
-            return userDB.getUsersByIds(memberIds)
+
+            const members = userDB.getUsersByIdArray(memberIds)
+
+            return (members.length > 0) ? members : null
         },
     },
     Review: {
         creator: (parent, _args, _context, _info) => {
             const { creatorId } = parent
-            const [creator] = userDB.getUsersByIds([creatorId])
-            return creator
+
+            return userDB.getUserById(creatorId)
         },
         producer: (parent, _args, _context, _info) => {
             const { producerId } = parent
-            const [producer] = userDB.getUsersByIds([producerId])
-            return producer
+
+            return userDB.getUserById(producerId)
         },
     },
     User: {
-        __resolveType(obj) {
-            switch (obj.type) {
+        __resolveType(user) {
+            switch (user.type) {
                 case UserType.CONSUMER: return 'Consumer'
                 case UserType.PRODUCER: return 'Producer'
                 default: throw new Error('User could not be identified.')
@@ -94,9 +129,9 @@ module.exports = {
         },
     },
     TransferAccount: {
-        __resolveType(obj) {
-            if (Object.keys(obj).includes('email')) return 'Paypal'
-            else if (Object.keys(obj).includes('account_number')) return 'Bank'
+        __resolveType(account) {
+            if (account.email) return 'Paypal'
+            else if (account.account_number) return 'Bank'
             throw new Error('BankAccount could not be identified.')
         },
     },
@@ -115,4 +150,9 @@ module.exports = {
         CASH: Payment.CASH,
         PAYPAL: Payment.PAYPAL
     },
+    Unit: {
+        QUANTITY: Unit.QUANTITY,
+        KILOGRAM: Unit.KILOGRAM,
+        LITER: Unit.LITER
+    }
 }
