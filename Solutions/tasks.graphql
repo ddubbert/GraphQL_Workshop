@@ -1,0 +1,65 @@
+type Query {
+    """ Returns all orders for a producer. """
+    orders(producerId: ID!): [Order!]
+}
+
+type Mutation {
+    """ Creates an order for a specific product and customer. """
+    createOrder(orderInput: OrderCreateInput!): Order!
+}
+
+""" Represents a payed order of a customer for a specific product of a producer. """
+interface Order {
+    id: ID!
+    product: Product!
+    amount: Int!
+    producer: Producer!
+    customer: User!
+    state: OrderState!
+}
+
+""" Represents an order, where the product will be send by mail. """
+type MailOrder implements Order {
+    id: ID!
+    product: Product!
+    amount: Int!
+    producer: Producer!
+    customer: User!
+    shipping_address: Address!
+    state: OrderState!
+}
+
+""" Represents an order, where the product will be picked up by the customer at a specific day and time. """
+type PickupOrder implements Order {
+    id: ID!
+    product: Product!
+    amount: Int!
+    producer: Producer!
+    customer: User!
+    pickup_date: DateTime!
+    state: OrderState!
+}
+
+enum OrderState {
+    PAYED
+    OPEN
+}
+
+input OrderCreateInput {
+    customerId: ID!
+    productId: ID!
+    amount: Int!
+    state: OrderState!
+    """ Either provide pickup_date to create a PickupOrder or shipping_address to create a MailOrder. """
+    pickup_date: DateTime
+    """ Either provide shipping_address to create a MailOrder or pickup_date to create a PickupOrder. """
+    shipping_address: AddressInput
+}
+
+input AddressInput {
+    street_name: String!
+    street_number: String!
+    city: String!
+    zip_code: Int!
+    country: String!
+}
