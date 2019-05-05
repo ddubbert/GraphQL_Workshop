@@ -12,9 +12,6 @@ const resolverList = fileLoader(path.join(__dirname, './resolvers'))
 const server = new GraphQLServer({
   typeDefs: mergeTypes(schemaList, { all: true }),
   resolvers: mergeResolvers(resolverList, { all: true }),
-  context: req => ({
-    ...req,
-  }),
 })
 
 server.express.use(config.app.voyager, middleware({ endpointUrl: config.app.endpoint }))
