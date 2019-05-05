@@ -39,7 +39,7 @@ const getReviewsForProducer = (producerId) => {
     return reviews.filter((review) => review.producerId === producerId)
 }
 
-const addReviewForProducer = (producerId, review) => {
+const createReviewForProducer = (producerId, review) => {
     const completeReview = { producerId, ...review }
     reviews.push(completeReview)
     return completeReview
@@ -48,5 +48,5 @@ const addReviewForProducer = (producerId, review) => {
 module.exports = Object.freeze({
     getReviewsOfUser,
     getReviewsForProducer,
-    addReviewForProducer
+    createReviewForProducer
 })

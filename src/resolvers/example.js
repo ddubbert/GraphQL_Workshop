@@ -30,26 +30,16 @@ module.exports = {
             const reviews = reviewDB.getReviewsOfUser(creatorId)
             return (reviews.length > 0) ? reviews : null
         },
-        products: (_parent, args, _context, _info) => {
-            const { queryInput } = args
-
-            if (queryInput) {
-                const products = productDB.getProductsMatchingQuery(queryInput)
-                return (products.length > 0) ? products : null
-            }
-
-            return productDB.getAllProducts()
-        },
     },
     Mutation: {
         createReview: (_parent, args, _context, _info) => {
             const { producerId, reviewInput } = args
             const { rating } = reviewInput
 
-            if (!isValidRating(rating)) throw new Error('Rating is not valid.')
+            if (!isValidRating(rating)) throw new Error('Rating is not valid. It needs to be a number from 1 to 5.')
             if (!userDB.isProducer(producerId)) throw new Error('User is not a producer.')
 
-            return reviewDB.addReviewForProducer(producerId, reviewInput)
+            return reviewDB.createReviewForProducer(producerId, reviewInput)
         }
     },
     Producer: {
@@ -120,7 +110,7 @@ module.exports = {
         },
     },
     User: {
-        __resolveType(user) {
+        __resolveType: (user) => {
             switch (user.type) {
                 case UserType.CONSUMER: return 'Consumer'
                 case UserType.PRODUCER: return 'Producer'
@@ -129,7 +119,7 @@ module.exports = {
         },
     },
     TransferAccount: {
-        __resolveType(account) {
+        __resolveType: (account) => {
             if (account.email) return 'Paypal'
             else if (account.account_number) return 'Bank'
             throw new Error('BankAccount could not be identified.')

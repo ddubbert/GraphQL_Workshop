@@ -35,25 +35,13 @@ const products = [
     },
 ]
 
-const isProduct = (productId) => {
-    const matchingProduct = getProductById(productId)
-
-    return matchingProduct !== null
-}
-
-const getAllProducts = () => products
-
 const getProductsByIdArray = (productIds) => {
     return products.filter((product) => productIds.includes(product.id))
 }
 
 const getProductById = (productId) => {
-    try {
-        const [matchingProduct] = products.filter((product) => productId === product.id)
-        return matchingProduct
-    } catch (e) {
-        return null
-    }
+    const matchingProduct = products.filter((product) => productId === product.id)
+    return (matchingProduct.length > 0) ? matchingProduct[0] : null
 }
 
 const isProductMatchingQuery = (product, query) => {
@@ -76,8 +64,6 @@ const getProductsMatchingQuery = (productQuery) => {
 }
 
 module.exports = Object.freeze({
-    isProduct,
-    getAllProducts,
     getProductById,
     getProductsByIdArray,
     getProductsMatchingQuery

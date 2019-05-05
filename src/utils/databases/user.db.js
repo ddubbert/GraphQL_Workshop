@@ -75,26 +75,13 @@ const getUsersByIdArray = (userIds) => {
 }
 
 const getUserById = (userId) => {
-    try {
-        const [matchingUser] = users.filter((user) => userId === user.id)
-        return matchingUser
-    } catch (e) {
-        return null
-    }
+    const matchingUser = users.filter((user) => userId === user.id)
+    return (matchingUser.length > 0) ? matchingUser[0] : null
 }
 
 const getUserByName = (username) => {
-    try {
-        const [matchingUser] = users.filter((user) => username === user.username)
-        return matchingUser
-    } catch (e) {
-        return null
-    }
-}
-
-const isUser = (userId) => {
-    const matchingUser = getUserById(userId)
-    return matchingUser !== null
+    const matchingUser = users.filter((user) => username === user.username)
+    rreturn (matchingUser.length > 0) ? matchingUser[0] : null
 }
 
 const isProducer = (userId) => {
@@ -108,6 +95,5 @@ module.exports = Object.freeze({
     getUserById,
     getUserByName,
     getUsersByIdArray,
-    isUser,
     isProducer
 })

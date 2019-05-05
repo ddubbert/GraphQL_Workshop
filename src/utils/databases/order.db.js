@@ -1,75 +1,63 @@
-const OrderState = require('../enums/OrderState')
-const productDB = require('./product.db')
+const OrderType = require('../enums/OrderType')
 
 const orders = [
     {
         id: '055b5da3',
-        productId: 'b4867cbd',
-        producerId: 'd467f50a',
+        product: 'b4867cbd',
+        producer: 'd467f50a',
         amount: 3,
-        customerId: '8935b480',
+        customer: '8935b480',
+        type: OrderType.MAIL,
         shipping_address: {
             street_name: 'Lustigstraße',
             street_number: '15a',
             city: 'Lustighausen',
             zip_code: '12345',
             country: 'LaLaLand'
-        },
-        state: OrderState.PAYED
+        }
     },
     {
         id: 'e93df95c',
-        productId: '32abfe84',
-        producerId: 'd467f50a',
+        product: '32abfe84',
+        producer: 'd467f50a',
         amount: 10,
-        customerId: '8935b480',
-        pickup_date: new Date(),
-        state: OrderState.OPEN
+        customer: '8935b480',
+        type: OrderType.PICKUP,
+        pickup_date: new Date()
     },
     {
         id: '0f54899c',
-        productId: '44080730',
-        producerId: 'da8ab4c0',
+        product: '44080730',
+        producer: 'da8ab4c0',
         amount: 1,
-        customerId: '8935b480',
+        customer: '8935b480',
+        type: OrderType.MAIL,
         shipping_address: {
             street_name: 'Lustigstraße',
             street_number: '15a',
             city: 'Lustighausen',
             zip_code: '12345',
             country: 'LaLaLand'
-        },
-        state: OrderState.PAYED
+        }
     }
 ]
 
-const getOrdersForProducer = (producerId) => {
-    return orders.filter((order) => order.producerId === producerId)
+const isOrderMatchingQuery = (order, query) => {
+    return Object.keys(query).every((key) => {
+        return order[key] === query[key]
+    })
 }
 
-const getOrdersOfUser = (userId) => {
-    return orders.filter((order) => order.customerId === userId)
+const filterOrders = (ordersToFilter, query) => {
+    const filteredOrders = ordersToFilter.filter((order) => isOrderMatchingQuery(order, query))
+    return filteredOrders
 }
 
-const getOrderById = (orderId) => {
-    return orders.filter((order) => order.id === orderId)
-}
-
-const createOrder = (orderInput) => {
-    const order = { ...orderInput }
-    const { productId } = order
-    const product = productDB.getProductById(productId)
-    
-    order.producerId = product.producerId
-    order.id = orders.length + 1
-    orders.push(order)
-
-    return order
+const getOrdersForProducer = (producer, query) => {
+    const ordersOfProducer = orders.filter((order) => order.producer === producer)
+    return (query) ? filterOrders(ordersOfProducer, query) : ordersOfProducer
 }
 
 module.exports = Object.freeze({
-    getOrdersForProducer,
-    getOrdersOfUser,
-    getOrderById,
-    createOrder
+    getOrdersForProducer
 })

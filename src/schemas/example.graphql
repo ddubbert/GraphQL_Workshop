@@ -12,9 +12,6 @@ type Query {
 
     """ Returns all reviews created by the user / creator. """
     reviews(creatorId: ID!): [Review!]
-    
-    """ Returns all products. If a query is provided, returns all matching products. """
-    products(queryInput: ProductQueryInput): [Product!]
 }
 
 type Mutation {

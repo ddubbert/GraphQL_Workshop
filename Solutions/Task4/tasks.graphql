@@ -1,0 +1,46 @@
+type Query {
+    """ Returns all orders for a producer. """
+    orders(producer: ID!, filter: OrderFilter): [Order!]
+}
+
+""" Represents a payed order of a customer for a specific product of a producer. """
+interface Order {
+    id: ID!
+    product: Product!
+    amount: Int!
+    producer: Producer!
+    customer: User!
+    type: OrderType!
+}
+
+""" Represents an order, where the product will be send by mail. """
+type MailOrder implements Order {
+    id: ID!
+    product: Product!
+    amount: Int!
+    producer: Producer!
+    customer: User!
+    type: OrderType!
+    shipping_address: Address!
+}
+
+""" Represents an order, where the product will be picked up by the customer at a specific day and time. """
+type PickupOrder implements Order {
+    id: ID!
+    product: Product!
+    amount: Int!
+    producer: Producer!
+    customer: User!
+    type: OrderType!
+    pickup_date: DateTime!
+}
+
+input OrderFilter {
+    product: ID
+    customer: ID
+}
+
+enum OrderType {
+    MAIL
+    PICKUP
+}

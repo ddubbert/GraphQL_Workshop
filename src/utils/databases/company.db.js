@@ -14,12 +14,8 @@ const companies = [
 ]
 
 const getCompanyById = (companyId) => {
-    try {
-        const [company] = companies.filter((company) => company.id === companyId)
-        return company
-    } catch (e) {
-        return null
-    }
+    const matchingCompany = companies.filter((company) => company.id === companyId)
+    return (matchingCompany.length > 0) ? matchingCompany[0] : null
 }
 
 module.exports = Object.freeze({

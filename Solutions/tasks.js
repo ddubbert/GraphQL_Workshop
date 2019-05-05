@@ -19,22 +19,10 @@ const sharedOrderResolvers = {
 module.exports = {
     Query: {
         orders: (_parent, args, _context, _info) => {
-            const { producerId } = args
-            const orders = orderDB.getOrdersForProducer(producerId)
+            const { producerId, queryInput } = args
+            const orders = orderDB.getOrdersForProducer(producerId, queryInput)
 
             return (orders.length > 0) ? orders : null
-        }
-    },
-    Mutation: {
-        createOrder: (_parent, args, _context, _info) => {
-            const { orderInput } = args
-            const keys = Object.keys(orderInput)
-
-            if (!productDB.isProduct(orderInput.productId)) throw new Error('Product not found.')
-            if (!userDB.isUser(orderInput.customerId)) throw new Error('Product not found.')
-            if (keys.length !== 5) throw new Error('Input is not valid.')
-
-            return orderDB.createOrder(orderInput)
         }
     },
     Order: {

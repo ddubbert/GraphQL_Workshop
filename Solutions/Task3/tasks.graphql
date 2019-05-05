@@ -1,0 +1,24 @@
+type Query {
+    """ Returns all orders for a producer. """
+    orders(producer: ID!, filter: OrderFilter): [Order!]
+}
+
+""" Represents a payed order of a customer for a specific product of a producer. """
+type Order {
+    id: ID!
+    product: Product!
+    amount: Int!
+    producer: Producer!
+    customer: User!
+    type: OrderType!
+}
+
+input OrderFilter {
+    product: ID
+    customer: ID
+}
+
+enum OrderType {
+    MAIL
+    PICKUP
+}
