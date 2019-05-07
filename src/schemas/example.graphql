@@ -7,8 +7,8 @@ type Query {
     """ If found, returns the user with the specified id. """
     user(name: String!): User
 
-    """ Returns all registered producers. """
-    producers: [Producer!]
+    """ Returns all registered producers. If rating is provided, returns all producers with a matching or higher rating. """
+    producers(rating: Float): [Producer!]
 
     """ Returns all reviews created by the user / creator. """
     reviews(creatorId: ID!): [Review!]

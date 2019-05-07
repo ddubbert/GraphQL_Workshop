@@ -10,6 +10,27 @@ const productDB = require('../utils/databases/product.db')
 
 const isValidRating = (rating) => rating <= 5 && rating >= 1
 
+const calculateRating = (producerId) => {
+    const reviews = reviewDB.getReviewsForProducer(producerId)
+
+    if (reviews.length === 0) return null
+
+    const sum = reviews.reduce((accumulator, review) => {
+        return accumulator + review.rating
+    }, 0)
+
+    return sum / reviews.length
+}
+
+const filterProducersByRating = (producers, minimumRating) => {
+    const filteredProducers = producers.filter((p) => {
+        const ratingOfProducer = calculateRating(p.id)
+        return (ratingOfProducer && ratingOfProducer >= minimumRating)
+    })
+
+    return (filteredProducers.length > 0) ? filteredProducers : null
+}
+
 module.exports = {
     Query: {
         users: (_parent, _args, _context, _info) => {
@@ -20,9 +41,13 @@ module.exports = {
             const { name } = args
             return userDB.getUserByName(name)
         },
-        producers: (_parent, _args, _context, _info) => {
+        producers: (_parent, args, _context, _info) => {
+            const { rating } = args
             const producers = userDB.getAllUsersOfType(UserType.PRODUCER)
-            return (producers.length > 0) ? producers : null
+
+            if (producers.length === 0) return null
+
+            return (rating) ? filterProducersByRating(producers, rating) : producers
         },
         reviews: (_parent, args, _context, _info) => {
             const { creatorId } = args
@@ -64,15 +89,7 @@ module.exports = {
             return (reviews.length > 0) ? reviews : null
         },
         average_rating: (parent, _args, _context, _info) => {
-            const reviews = reviewDB.getReviewsForProducer(parent.id)
-
-            if (reviews.length === 0) return null
-
-            const sum = reviews.reduce((accumulator, review) => {
-                return accumulator + review.rating
-            }, 0)
-
-            return sum / reviews.length
+            return calculateRating(parent.id)
         }
     },
     Consumer: {
