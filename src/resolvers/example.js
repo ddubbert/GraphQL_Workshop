@@ -65,7 +65,14 @@ module.exports = {
             if (!userDB.isProducer(producerId)) throw new Error('User is not a producer.')
 
             return reviewDB.createReviewForProducer(producerId, reviewInput)
-        }
+        },
+        createProduct: (_parent, args, _context, _info) => {
+            const { producerId, productInput } = args
+
+            if (!userDB.isProducer(producerId)) throw new Error('User is not a producer.')
+
+            return productDB.createProductForProducer(producerId, productInput)
+        },
     },
     Producer: {
         company: (parent, _args, _context, _info) => {

@@ -17,6 +17,9 @@ type Query {
 type Mutation {
     """ Creates a new review for a producer. """
     createReview(producerId: ID!, reviewInput: ReviewCreateInput!): Review!
+
+    """ Creates a product for a producer. """
+    createProduct(producerId: ID!, productInput: CreateProductInput!): Product!
 }
 
 type Address {
@@ -132,6 +135,13 @@ input ProductQueryInput {
     name: String
     productId: ID
     producerId: ID
+}
+
+input CreateProductInput {
+    name: String!
+    unit: Unit!
+    price_per_unit: Float!
+    description: String
 }
 
 enum Unit {

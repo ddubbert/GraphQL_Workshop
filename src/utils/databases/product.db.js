@@ -63,8 +63,20 @@ const getProductsMatchingQuery = (productQuery) => {
     return matchingProducts
 }
 
+const createProductForProducer = (producerId, productInput) => {
+    const product = {
+        producerId,
+        ...productInput,
+        id: products.length
+    }
+
+    products.push(product)
+    return product
+}
+
 module.exports = Object.freeze({
     getProductById,
     getProductsByIdArray,
-    getProductsMatchingQuery
+    getProductsMatchingQuery,
+    createProductForProducer
 })
