@@ -81,7 +81,7 @@ const getUserById = (userId) => {
 
 const getUserByName = (username) => {
     const matchingUser = users.filter((user) => username === user.username)
-    rreturn (matchingUser.length > 0) ? matchingUser[0] : null
+    return (matchingUser.length > 0) ? matchingUser[0] : null
 }
 
 const isProducer = (userId) => {
