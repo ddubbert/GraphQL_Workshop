@@ -43,6 +43,20 @@ module.exports = {
             return (orders.length > 0) ? orders : null
         }
     },
+    Subscription: {
+        orderAdded: {
+            subscribe: withFilter(
+                (_parent, _args, context, _info) => {
+                    const { pubsub } = context
+
+                    return pubsub.asyncIterator(Channels.ORDER_ADDED_CHANNEL)
+                },
+                (payload, variables) => {
+                    return payload.orderAdded.producer === variables.producerId
+                }
+            )
+        }
+    },
     Order: {
         __resolveType: (order) => {
             switch(order.type) {
@@ -62,5 +76,4 @@ module.exports = {
         MAIL: OrderType.MAIL,
         PICKUP: OrderType.PICKUP
     }
-    // TODO: Aufgabe Subscriptions -> Live Coding
 }

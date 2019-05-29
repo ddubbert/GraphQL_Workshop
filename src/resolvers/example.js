@@ -1,12 +1,16 @@
+const { withFilter } = require('graphql-yoga')
+
 const Day = require('../utils/enums/Day')
 const Payment = require('../utils/enums/Payment')
 const UserType = require('../utils/enums/UserType')
 const Unit = require('../utils/enums/Unit')
+const Channels = require('../utils/enums/ChannelNames')
 
 const userDB = require('../utils/databases/user.db')
 const companyDB = require('../utils/databases/company.db')
 const reviewDB = require('../utils/databases/reviews.db')
 const productDB = require('../utils/databases/product.db')
+const orderDB = require('../utils/databases/order.db')
 
 const isValidRating = (rating) => rating <= 5 && rating >= 1
 
@@ -57,14 +61,19 @@ module.exports = {
         },
     },
     Mutation: {
-        createReview: (_parent, args, _context, _info) => {
+        createReview: (_parent, args, context, _info) => {
+            const { pubsub } = context
             const { producerId, reviewInput } = args
             const { rating } = reviewInput
 
             if (!isValidRating(rating)) throw new Error('Rating is not valid. It needs to be a number from 1 to 5.')
             if (!userDB.isProducer(producerId)) throw new Error('User is not a producer.')
 
-            return reviewDB.createReviewForProducer(producerId, reviewInput)
+            const review = reviewDB.createReviewForProducer(producerId, reviewInput)
+
+            pubsub.publish(Channels.REVIEW_ADDED_CHANNEL, { reviewAdded: review })
+
+            return review
         },
         createProduct: (_parent, args, _context, _info) => {
             const { producerId, productInput } = args
@@ -72,6 +81,27 @@ module.exports = {
             if (!userDB.isProducer(producerId)) throw new Error('User is not a producer.')
 
             return productDB.createProductForProducer(producerId, productInput)
+        },
+        createOrder: (_parent, args, context, _info) => {
+            const { orderInput } = args
+            const { pubsub } = context
+
+            const order = orderDB.createOrder(orderInput)
+
+            pubsub.publish(Channels.ORDER_ADDED_CHANNEL, { orderAdded: order })
+            
+            return order
+        },
+    },
+    Subscription: {
+        reviewAdded: {
+            subscribe: withFilter(
+                (_parent, _args, context, _info) => {
+                    const { pubsub } = context
+                    return pubsub.asyncIterator(Channels.REVIEW_ADDED_CHANNEL)
+                },
+                (payload, variables) => payload.reviewAdded.producerId === variables.producerId,
+            )
         },
     },
     Producer: {

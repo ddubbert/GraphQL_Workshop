@@ -20,9 +20,25 @@ type Mutation {
 
     """ Creates a product for a producer. """
     createProduct(producerId: ID!, productInput: CreateProductInput!): Product!
+
+    """ Creates an Order for a specific product, producer and customer. """
+    createOrder(orderInput: OrderCreateInput!) : Order!
+}
+
+type Subscription {
+    """ Subscribe to all new reviews for a producer """
+    reviewAdded(producerId: ID!) : Review!
 }
 
 type Address {
+    street_name: String!
+    street_number: String!
+    city: String!
+    zip_code: Int!
+    country: String!
+}
+
+input AddressCreateInput {
     street_name: String!
     street_number: String!
     city: String!
@@ -148,4 +164,12 @@ enum Unit {
     QUANTITY
     LITER
     KILOGRAM
+}
+
+input OrderCreateInput {
+    customerId: ID!
+    productId: ID!
+    amount: Int!
+    pickup_date: DateTime
+    shipping_address: AddressCreateInput
 }

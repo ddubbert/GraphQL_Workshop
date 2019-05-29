@@ -89,11 +89,16 @@ const isProducer = (userId) => {
     return matchingUser !== null && matchingUser.type === UserType.PRODUCER
 }
 
+const isUser = (userId) => {
+    return getUserById(userId) !== null
+}
+
 module.exports = Object.freeze({
     getAllUsers,
     getAllUsersOfType,
     getUserById,
     getUserByName,
     getUsersByIdArray,
+    isUser,
     isProducer
 })

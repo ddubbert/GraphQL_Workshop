@@ -1,3 +1,8 @@
+const { withFilter } = require('graphql-yoga')
+
+const OrderType = require('../utils/enums/OrderType') 
+const Channels = require('../utils/enums/ChannelNames')
+
 const productDB = require('../utils/databases/product.db')
 const userDB = require('../utils/databases/user.db')
 const orderDB = require('../utils/databases/order.db')
@@ -17,11 +22,13 @@ const orderDB = require('../utils/databases/order.db')
 
 module.exports = {
     Query: {
-        // TODO: Aufgabe 1.c + 1.e
+        // TODO: Aufgabe 1.b
     },
     // TODO: Aufgabe 2.b
 
     // TODO: Aufgabe 3.b
     
     // TODO: Aufgabe 4.b
+
+    // TODO: Aufgabe Subscriptions -> Live Coding
 }

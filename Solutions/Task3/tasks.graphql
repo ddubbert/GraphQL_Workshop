@@ -1,21 +1,27 @@
 type Query {
     """ Returns all orders for a producer. """
-    orders(producer: ID!, filter: OrderFilter): [Order!]
+    orders(producerId: ID!): [Order!]
 }
 
 """ Represents a payed order of a customer for a specific product of a producer. """
 type Order {
+    """ The id of the order. """
     id: ID!
-    product: Product!
-    amount: Int!
-    producer: Producer!
-    customer: User!
-    type: OrderType!
-}
 
-input OrderFilter {
-    product: ID
-    customer: ID
+    """ The bought product. """
+    product: Product!
+
+    """ The amoun of bought units. """
+    amount: Int!
+
+    """ The producer, selling the product. """
+    producer: Producer!
+
+    """ The customer / user, buying the product. """
+    customer: User!
+
+    """ The type of the order. """
+    type: OrderType!
 }
 
 enum OrderType {

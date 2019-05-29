@@ -1,0 +1,18 @@
+
+""" Represents a payed order of a customer for a specific product of a producer. """
+type Order {
+    """ The id of the order. """
+    id: ID!
+
+    """ The id of the bought product. """
+    product: ID!
+
+    """ The amoun of bought units. """
+    amount: Int!
+
+    """ The id of the producer, selling the product. """
+    producer: ID!
+
+    """ The id of the customer, buying the product. """
+    customer: ID!
+}

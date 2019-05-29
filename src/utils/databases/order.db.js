@@ -1,4 +1,8 @@
+const uniqid = require('uniqid')
+
 const OrderType = require('../enums/OrderType')
+const productDB = require('./product.db')
+const userDB = require('./user.db')
 
 const orders = [
     {
@@ -58,6 +62,53 @@ const getOrdersForProducer = (producer, query) => {
     return (query) ? filterOrders(ordersOfProducer, query) : ordersOfProducer
 }
 
+const createOrderObject = (orderInput, product, customer) => {
+    const { amount, pickup_date, shipping_address } = orderInput
+
+    const order = {
+        amount,
+        id: uniqid.time(),
+        product: product.id,
+        producer: product.producerId,
+        customer: customer.id
+    }
+
+    if (pickup_date) {
+        order.type = OrderType.PICKUP
+        order.pickup_date = pickup_date
+    } else {
+        order.type = OrderType.MAIL
+        order.shipping_address = shipping_address || customer.address
+    }
+
+    return order
+}
+
+const getProductIfPresent = (productId) => {
+    const product = productDB.getProductById(productId)
+    if (!product) throw new Error('Product not found.')
+    return product
+}
+
+const getUserIfPresent = (userId) => {
+    const user = userDB.getUserById(userId)
+    if (!user) throw new Error('User not found.')
+    return user
+}
+
+const createOrder = (orderInput) => {
+    const { productId, customerId } = orderInput
+    const product = getProductIfPresent(productId)
+    const customer = getUserIfPresent(customerId)
+
+    const order = createOrderObject(orderInput, product, customer)
+
+    orders.push(order)
+
+    return order
+}
+
 module.exports = Object.freeze({
-    getOrdersForProducer
+    getOrdersForProducer,
+    createOrder
 })

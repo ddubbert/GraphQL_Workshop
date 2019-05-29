@@ -3,6 +3,11 @@ type Query {
     orders(producerId: ID!): [Order!]
 }
 
+type Subscription {
+    """ Subscribe to all new orders for a specific producer. """
+    orderAdded(producerId: ID!): Order!
+}
+
 """ Represents a payed order of a customer for a specific product of a producer. """
 interface Order {
     """ The id of the order. """
