@@ -4,7 +4,7 @@ type Query {
 }
 
 """ Represents a payed order of a customer for a specific product of a producer. """
-type Order {
+interface Order {
     """ The id of the order. """
     id: ID!
 
@@ -19,12 +19,26 @@ type Order {
 
     """ The customer / user, buying the product. """
     customer: User!
-
-    """ The type of the order. """
-    type: OrderType!
 }
 
-enum OrderType {
-    MAIL
-    PICKUP
+""" Represents an order, where the product will be send by mail. """
+type MailOrder implements Order {
+    id: ID!
+    product: Product!
+    amount: Int!
+    producer: Producer!
+    customer: User!
+    type: OrderType!
+    shipping_address: Address!
+}
+
+""" Represents an order, where the product will be picked up by the customer at a specific day and time. """
+type PickupOrder implements Order {
+    id: ID!
+    product: Product!
+    amount: Int!
+    producer: Producer!
+    customer: User!
+    type: OrderType!
+    pickup_date: DateTime!
 }

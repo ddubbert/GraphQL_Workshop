@@ -1,10 +1,11 @@
 const { withFilter } = require('graphql-yoga')
 
 const OrderType = require('../utils/enums/OrderType') 
+const Channels = require('../utils/enums/ChannelNames')
+
 const productDB = require('../utils/databases/product.db')
 const userDB = require('../utils/databases/user.db')
 const orderDB = require('../utils/databases/order.db')
-const Channels = require('../utils/enums/ChannelNames')
 
 /**
  * Beispielhafte Struktur einer Bestellung (Order) in der Datenbank:
@@ -14,6 +15,7 @@ const Channels = require('../utils/enums/ChannelNames')
  *      producer: 'd467f50a',
  *      amount: 3,
  *      customer: '8935b480',
+ *      type: 'mail' or 'pickup',
  * 
  *      ... weitere Attribute
  * }
@@ -43,6 +45,20 @@ module.exports = {
             return (orders.length > 0) ? orders : null
         }
     },
+    Subscription: {
+        orderAdded: {
+            subscribe: withFilter(
+                (_parent, _args, context, _info) => {
+                    const { pubsub } = context
+
+                    return pubsub.asyncIterator(Channels.ORDER_ADDED_CHANNEL)
+                },
+                (payload, variables) => {
+                    return payload.orderAdded.producer === variables.producerId
+                }
+            )
+        }
+    },
     Order: {
         __resolveType: (order) => {
             switch(order.type) {
@@ -62,5 +78,4 @@ module.exports = {
         MAIL: OrderType.MAIL,
         PICKUP: OrderType.PICKUP
     }
-    // TODO: Aufgabe Subscriptions -> Live Coding
 }

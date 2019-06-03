@@ -3,8 +3,13 @@ type Query {
     orders(producerId: ID!): [Order!]
 }
 
+type Subscription {
+    """ Subscribe to all new orders for a specific producer. """
+    orderAdded(producerId: ID!): Order!
+}
+
 """ Represents a payed order of a customer for a specific product of a producer. """
-interface Order {
+type Order {
     """ The id of the order. """
     id: ID!
 
@@ -27,26 +32,4 @@ interface Order {
 enum OrderType {
     MAIL
     PICKUP
-}
-
-""" Represents an order, where the product will be send by mail. """
-type MailOrder implements Order {
-    id: ID!
-    product: Product!
-    amount: Int!
-    producer: Producer!
-    customer: User!
-    type: OrderType!
-    shipping_address: Address!
-}
-
-""" Represents an order, where the product will be picked up by the customer at a specific day and time. """
-type PickupOrder implements Order {
-    id: ID!
-    product: Product!
-    amount: Int!
-    producer: Producer!
-    customer: User!
-    type: OrderType!
-    pickup_date: DateTime!
 }

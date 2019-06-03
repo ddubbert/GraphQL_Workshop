@@ -15,6 +15,7 @@ const orderDB = require('../utils/databases/order.db')
  *      producer: 'd467f50a',
  *      amount: 3,
  *      customer: '8935b480',
+ *      type: 'mail' or 'pickup',
  * 
  *      ... weitere Attribute
  * }
@@ -28,7 +29,5 @@ module.exports = {
 
     // TODO: Aufgabe 3.b
     
-    // TODO: Aufgabe 4.b
-
     // TODO: Aufgabe Subscriptions -> Live Coding
 }

@@ -24,14 +24,6 @@ interface Order {
 
     """ The customer / user, buying the product. """
     customer: User!
-
-    """ The type of the order. """
-    type: OrderType!
-}
-
-enum OrderType {
-    MAIL
-    PICKUP
 }
 
 """ Represents an order, where the product will be send by mail. """
