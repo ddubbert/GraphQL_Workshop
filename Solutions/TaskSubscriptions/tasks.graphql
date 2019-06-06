@@ -33,7 +33,6 @@ type MailOrder implements Order {
     amount: Int!
     producer: Producer!
     customer: User!
-    type: OrderType!
     shipping_address: Address!
 }
 
@@ -44,6 +43,5 @@ type PickupOrder implements Order {
     amount: Int!
     producer: Producer!
     customer: User!
-    type: OrderType!
     pickup_date: DateTime!
 }
